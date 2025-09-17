@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kanoe.moe - Domain Availability Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-overlay">
+        <div class="container">
+            <header>
+                <h1>kanoe.moe</h1>
+                <p>Domain Availability Dashboard</p>
+            </header>
+            
+            <main>
+                <div class="status-summary">
+                    <div class="stat-card">
+                        <h3>Total Domains</h3>
+                        <span id="total-domains">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Available</h3>
+                        <span id="available-domains">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Alive</h3>
+                        <span id="alive-domains">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Last Updated</h3>
+                        <span id="last-updated">--</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="refresh-all" class="btn btn-primary">Refresh All</button>
+                    <input type="text" id="new-domain" placeholder="Add new domain (e.g., example.com)">
+                    <button id="add-domain" class="btn btn-secondary">Add Domain</button>
+                </div>
+                
+                <div class="domains-grid" id="domains-grid">
+                    <!-- Domain cards will be populated here -->
+                </div>
+            </main>
+            
+            <footer>
+                <p>Last auto-update via GitHub Actions: <span id="workflow-update">--</span></p>
+            </footer>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

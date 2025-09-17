@@ -1,0 +1,157 @@
+name: Daily Domain Check
+
+on:
+  schedule:
+    # Run every day at 8:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    branches: [ main ]
+    paths: 
+      - '.github/workflows/domain-check.yml'
+      - 'domains.json'
+
+jobs:
+  check-domains:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm init -y
+        npm install whois dns ping
+        
+    - name: Check domain availability and status
+      run: |
+        cat > check-domains.js << 'EOF'
+        const fs = require('fs');
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execAsync = util.promisify(exec);
+        
+        // Default domains list
+        const defaultDomains = [
+          'google.com',
+          'github.com', 
+          'stackoverflow.com',
+          'example.com',
+          'nonexistent-domain-12345.com',
+          'test-domain-availability.org',
+          'kanoe.moe',
+          'domain-checker-test.net'
+        ];
+        
+        async function checkDomain(domain) {
+          console.log(`Checking ${domain}...`);
+          
+          const result = {
+            domain,
+            timestamp: new Date().toISOString(),
+            available: false,
+            alive: false,
+            httpStatus: null,
+            httpsStatus: null,
+            dnsResolved: false
+          };
+          
+          try {
+            // Check DNS resolution
+            try {
+              await execAsync(`nslookup ${domain}`);
+              result.dnsResolved = true;
+              console.log(`${domain}: DNS resolved`);
+            } catch (e) {
+              console.log(`${domain}: DNS not resolved`);
+            }
+            
+            // Check HTTP/HTTPS availability
+            try {
+              const httpCheck = await execAsync(`curl -I --connect-timeout 10 --max-time 15 -s http://${domain} | head -n 1`);
+              result.httpStatus = httpCheck.stdout.trim();
+              result.alive = true;
+              console.log(`${domain}: HTTP accessible`);
+            } catch (e) {
+              console.log(`${domain}: HTTP not accessible`);
+            }
+            
+            try {
+              const httpsCheck = await execAsync(`curl -I --connect-timeout 10 --max-time 15 -s https://${domain} | head -n 1`);
+              result.httpsStatus = httpsCheck.stdout.trim();
+              result.alive = true;
+              console.log(`${domain}: HTTPS accessible`);
+            } catch (e) {
+              console.log(`${domain}: HTTPS not accessible`);
+            }
+            
+            // Simple availability check - if DNS doesn't resolve, likely available
+            result.available = !result.dnsResolved;
+            
+          } catch (error) {
+            console.error(`Error checking ${domain}:`, error.message);
+          }
+          
+          return result;
+        }
+        
+        async function main() {
+          const results = {
+            lastUpdate: new Date().toISOString(),
+            domains: {}
+          };
+          
+          for (const domain of defaultDomains) {
+            results.domains[domain] = await checkDomain(domain);
+            // Add delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          // Write results to JSON file
+          fs.writeFileSync('domain-status.json', JSON.stringify(results, null, 2));
+          console.log('Domain check completed. Results saved to domain-status.json');
+          
+          // Update a simple status file for the web page
+          const summary = {
+            total: defaultDomains.length,
+            available: Object.values(results.domains).filter(d => d.available).length,
+            alive: Object.values(results.domains).filter(d => d.alive).length,
+            lastUpdate: results.lastUpdate
+          };
+          
+          fs.writeFileSync('status-summary.json', JSON.stringify(summary, null, 2));
+        }
+        
+        main().catch(console.error);
+        EOF
+        
+        node check-domains.js
+        
+    - name: Create workflow status file
+      run: |
+        echo "{\"lastWorkflowRun\": \"$(date -u +'%Y-%m-%d %H:%M:%S UTC')\", \"status\": \"completed\"}" > workflow-status.json
+        
+    - name: Commit and push results
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: 'Update domain status - automated check'
+        file_pattern: '*.json'
+        commit_user_name: 'github-actions[bot]'
+        commit_user_email: 'github-actions[bot]@users.noreply.github.com'
+        
+    - name: Display results
+      run: |
+        echo "=== Domain Check Results ==="
+        if [ -f domain-status.json ]; then
+          cat domain-status.json
+        fi
+        if [ -f status-summary.json ]; then
+          echo "=== Summary ==="
+          cat status-summary.json
+        fi
