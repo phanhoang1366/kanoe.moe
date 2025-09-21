@@ -1,2 +1,2 @@
 # kanoe.moe
-BA Domain Availability Checker
+A simple blog
