@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://verbose-space-yodel-rxj5x5vgxrr3wqvq-1111.app.github.dev"
+base_url = "https://kanoe.moe"
 theme = "anemone"
 
 # Whether to automatically compile all Sass files in the sass directory
