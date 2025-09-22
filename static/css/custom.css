@@ -1,0 +1,11 @@
+.moe {
+  position: fixed;
+  z-index: -1;
+  bottom: 0;
+  right: 25px;
+  height: 200px;
+  opacity: 0.8;
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+}
