@@ -1,5 +1,6 @@
 # The URL the site will be built for
 base_url = "https://kanoe.moe"
+title = "Kanoe"
 theme = "anemone"
 
 # Whether to automatically compile all Sass files in the sass directory
@@ -19,5 +20,5 @@ highlight_code = true
 header_nav = [
   { url = "/", name_en = "/home/" },
   { url = "/about", name_en = "/about/" },
-  { url = "https://blog.kanoe.moe", name_en = "/blog/" }
+  { url = "https://memos.kanoe.moe", name_en = "/memos/" }
 ]
