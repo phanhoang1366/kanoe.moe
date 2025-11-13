@@ -20,5 +20,5 @@ highlight_code = true
 header_nav = [
   { url = "/", name_en = "/home/" },
   { url = "/about", name_en = "/about/" },
-  { url = "https://memos.kanoe.moe", name_en = "/memos/" }
+  { url = "https://kanoe.azurewebsites.net", name_en = "/memos/" }
 ]
