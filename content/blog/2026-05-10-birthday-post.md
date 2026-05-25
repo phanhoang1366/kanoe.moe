@@ -1,7 +1,7 @@
 +++
 title = "Happy Birthday to me!"
 [taxonomies]
-tags = ["birthday"]
+tags = ["birthday", "rant", "ai"]
 [extra]
 display_published = true
 toc = false
